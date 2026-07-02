@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Brandt's Bar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --walnut:#2a1505;
+  --mahogany:#3d1e0a;
+  --bourbon:#6b3410;
+  --amber:#c17f3e;
+  --gold:#c9a84c;
+  --gold-dim:rgba(201,168,76,0.3);
+  --cream:#f5edd8;
+  --light-text:#d4b483;
+  --mid-text:#a07840;
+  --card-bg:rgba(45,20,8,0.95);
+}
+
+body {
+  background: var(--walnut);
+  min-height: 100vh;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--cream);
+  font-size: 16px;
+}
+
+/* NAV */
+.app-header {
+  background: linear-gradient(180deg, #1a0a02 0%, var(--mahogany) 100%);
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 16px 20px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.bar-title { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--cream); }
+.bar-title span { color:var(--gold); }
+.bar-sub { font-family:'IM Fell English',serif; font-style:italic; font-size:12px; color:var(--mid-text); margin-top:2px; }
+
+.nav-tabs {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-top: 14px;
+  border-bottom: 1px solid var(--gold-dim);
+}
+.nav-tabs::-webkit-scrollbar { display:none; }
+.nav-tab {
+  padding: 8px 16px;
+  font-family:'Cormorant Garamond',serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid-text);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: block;
+}
+.nav-tab:hover { color: var(--light-text); }
+
+/* CSS-only tab system using :target */
+.tab-section { display: none; }
+.tab-section:first-of-type { display: block; }
+:target { display: block; }
+
+/* Show cocktails by default */
+#cocktails { display: block; }
+
+/* Active tab highlight using :target */
+.nav-tab[href="#cocktails"] { color: var(--gold); border-bottom-color: var(--gold); }
+#syrups:target ~ * .nav-tab[href="#cocktails"],
+#planahead:target ~ * .nav-tab[href="#cocktails"],
+#inventory:target ~ * .nav-tab[href="#cocktails"] { color: var(--mid-text); border-bottom-color: transparent; }
+
+.main { padding: 20px; max-width: 700px; margin: 0 auto; }
+
+/* COCKTAIL GRID */
+.cocktail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .cocktail-grid { grid-template-columns: 1fr; }
+}
+
+.cocktail-card {
+  background: var(--card-bg);
+  border: 1px solid var(--gold-dim);
+  border-radius: 6px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.cocktail-card::before {
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;
+}
+.cocktail-card.daily { border-color:rgba(201,168,76,0.5); }
+.cocktail-card.daily::before { opacity:1; }
+.cocktail-card:active { border-color:var(--gold); }
+
+.card-daily-tag {
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:6px;
+  font-family:'Cormorant Garamond',serif;
+}
+.card-emoji { font-size:24px; margin-bottom:8px; display:block; }
+.card-name { font-family:'Playfair Display',serif; font-size:17px; font-weight:600; color:var(--cream); line-height:1.2; margin-bottom:4px; }
+.card-spirit { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:6px; }
+.card-desc { font-family:'IM Fell English',serif;font-style:italic;font-size:13px;color:var(--light-text);line-height:1.4; }
+.card-badge { display:inline-block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--amber);border:1px solid var(--gold-dim);padding:1px 6px;margin-top:6px; }
+
+/* RECIPE PAGES */
+.recipe-page { display:none; padding:20px; max-width:700px; margin:0 auto; }
+.recipe-page:target { display:block; }
+
+.back-link {
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--amber);font-family:'Cormorant Garamond',serif;
+  font-size:13px;letter-spacing:2px;text-transform:uppercase;
+  text-decoration:none;margin-bottom:20px;
+  padding:8px 0;
+}
+.back-link:active { color:var(--gold); }
+
+.recipe-emoji { font-size:36px;margin-bottom:8px; }
+.recipe-name { font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--cream);line-height:1.1;margin-bottom:4px; }
+.recipe-spirit { font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:8px; }
+.recipe-tagline { font-family:'IM Fell English',serif;font-style:italic;font-size:15px;color:var(--light-text);margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--gold-dim); }
+
+.section-label { font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--amber);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--gold-dim); }
+
+.ingredients-list { list-style:none;margin-bottom:24px; }
+.ingredient { display:flex;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(201,168,76,0.1); }
+.ingredient:last-child { border-bottom:none; }
+.ing-amount { font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--gold);min-width:65px;white-space:nowrap; }
+.ing-name { font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--cream);flex:1;line-height:1.3; }
+
+.steps-list { list-style:none;margin-bottom:20px; }
+.step { display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(201,168,76,0.1); }
+.step:last-child { border-bottom:none; }
+.step-num { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold-dim);min-width:26px;line-height:1.2; }
+.step-text { font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--cream);line-height:1.6;flex:1; }
+.step-note { font-family:'IM Fell English',serif;font-style:italic;font-size:13px;color:var(--mid-text);margin-top:4px; }
+
+.notes-box { background:rgba(201,168,76,0.06);border:1px solid var(--gold-dim);border-left:3px solid var(--gold);padding:14px 16px;border-radius:2px;margin-top:4px; }
+.notes-box p { font-family:'IM Fell English',serif;font-style:italic;font-size:14px;color:var(--light-text);line-height:1.6;margin-bottom:6px; }
+.notes-box p:last-child { margin-bottom:0; }
+
+/* SYRUPS / OTHER SECTIONS */
+.section-card { background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:6px;padding:20px;margin-bottom:16px; }
+.section-card-title { font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--cream);margin-bottom:4px; }
+.section-card-sub { font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:14px; }
+
+/* PLAN AHEAD TIMELINE */
+.timeline { position:relative;padding-left:28px; }
+.timeline::before { content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--gold-dim); }
+.timeline-item { position:relative;margin-bottom:16px;background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:6px;padding:14px 16px; }
+.timeline-item::before { content:'';position:absolute;left:-23px;top:18px;width:10px;height:10px;background:var(--gold);border-radius:50%; }
+.timeline-day { font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px; }
+.timeline-title { font-family:'Playfair Display',serif;font-size:17px;color:var(--cream);margin-bottom:6px; }
+.timeline-desc { font-family:'IM Fell English',serif;font-style:italic;font-size:14px;color:var(--light-text);line-height:1.5; }
+
+.divider { height:1px;background:linear-gradient(to right,transparent,var(--gold-dim),transparent);margin:20px 0; }
+.section-intro { font-family:'IM Fell English',serif;font-style:italic;font-size:16px;color:var(--light-text);margin-bottom:20px;line-height:1.5; }
+
+/* INVENTORY */
+.inv-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+@media(max-width:480px) { .inv-grid { grid-template-columns:1fr; } }
+.inv-card { background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:6px;padding:16px; }
+.inv-title { font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:4px; }
+.inv-sub { font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:8px; }
+.inv-uses { font-family:'IM Fell English',serif;font-style:italic;font-size:13px;color:var(--light-text);line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="bar-title">Brandt<span>'s</span> Bar</div>
+  <div class="bar-sub">Behind the Bar · Cocktail Reference</div>
+  <nav class="nav-tabs">
+    <a class="nav-tab" href="#cocktails" style="color:var(--gold);border-bottom:2px solid var(--gold);">All Cocktails</a>
+    <a class="nav-tab" href="#syrups">House Syrups</a>
+    <a class="nav-tab" href="#planahead">Plan Ahead</a>
+    <a class="nav-tab" href="#inventory">Bar Inventory</a>
+  </nav>
+</div>
+
+<!-- ==================== COCKTAILS HOME ==================== -->
+<div id="cocktails" class="tab-section">
+  <div class="main">
+    <div class="cocktail-grid">
+
+      <a class="cocktail-card daily" href="#r-oldfashioned">
+        <div class="card-daily-tag">✦ Daily Signature</div>
+        <span class="card-emoji">🌶️</span>
+        <div class="card-name">The Old Fashioned</div>
+        <div class="card-spirit">Bourbon</div>
+        <div class="card-desc">Woodford Reserve with house-made coriander red pepper syrup</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-manhattan">
+        <span class="card-emoji">🍒</span>
+        <div class="card-name">The Brandt Manhattan</div>
+        <div class="card-spirit">Rye Whiskey</div>
+        <div class="card-desc">Bulleit Rye, sweet vermouth, Angostura & Peychaud's bitters</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-rosemary">
+        <span class="card-emoji">🌿</span>
+        <div class="card-name">Rosemary Lemon Martini</div>
+        <div class="card-spirit">Vodka</div>
+        <div class="card-desc">Tito's, rosemary simple syrup, fresh lemon — highly requested</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-bloodmarg">
+        <span class="card-emoji">🍊</span>
+        <div class="card-name">Blood Orange Margarita</div>
+        <div class="card-spirit">Tequila</div>
+        <div class="card-desc">House tequila, blood orange, fresh lime, Cointreau</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-bloodmule">
+        <span class="card-emoji">🍊</span>
+        <div class="card-name">Blood Orange Mule</div>
+        <div class="card-spirit">Your Choice</div>
+        <div class="card-desc">Vodka, Tequila, or Bourbon · Fever-Tree Blood Orange Ginger Beer</div>
+        <div class="card-badge">Choose Your Spirit</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-maitai">
+        <span class="card-emoji">🌴</span>
+        <div class="card-name">Mai Tai</div>
+        <div class="card-spirit">Rum</div>
+        <div class="card-desc">Appleton Estate, Cointreau, orgeat, fresh lime</div>
+        <div class="card-badge">Summer</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-smash">
+        <span class="card-emoji">🫐</span>
+        <div class="card-name">Blueberry Bourbon Smash</div>
+        <div class="card-spirit">Bourbon</div>
+        <div class="card-desc">Woodford Reserve, fresh blueberries, mint, lemon</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-bbb">
+        <span class="card-emoji">🥓</span>
+        <div class="card-name">Bourbon.Bacon.Beautiful</div>
+        <div class="card-spirit">Bourbon</div>
+        <div class="card-desc">Bacon fat washed Woodford, grapefruit shrub, maple syrup</div>
+        <div class="card-badge">Plan 3 Days Ahead</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-pommartini">
+        <span class="card-emoji">🎄</span>
+        <div class="card-name">Christmas Pomegranate Martini</div>
+        <div class="card-spirit">Vodka</div>
+        <div class="card-desc">Tito's, PAMA liqueur, Cointreau, pomegranate — Christmas tradition</div>
+        <div class="card-badge">Christmas</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-ranchwater">
+        <span class="card-emoji">💧</span>
+        <div class="card-name">Ranch Water</div>
+        <div class="card-spirit">Tequila</div>
+        <div class="card-desc">House tequila, fresh lime, sparkling water — crisp and easy</div>
+        <div class="card-badge">Summer</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-whiskeylemonade">
+        <span class="card-emoji">🍋</span>
+        <div class="card-name">Whiskey Lemonade</div>
+        <div class="card-spirit">Bourbon · Batch</div>
+        <div class="card-desc">Woodford Reserve, fresh squeezed lemon, orange bitters, lemon bubbly water</div>
+        <div class="card-badge">Summer · Batch</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-paloma">
+        <span class="card-emoji">🍊</span>
+        <div class="card-name">Easy Paloma</div>
+        <div class="card-spirit">Tequila</div>
+        <div class="card-desc">House tequila, grapefruit soda, fresh lime, pinch of salt</div>
+        <div class="card-badge">Summer</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-caipirinha">
+        <span class="card-emoji">🇧🇷</span>
+        <div class="card-name">The Caipirinha</div>
+        <div class="card-spirit">Cachaça</div>
+        <div class="card-desc">Cachaça, fresh muddled lime chunks, sugar — Brazil's national cocktail</div>
+        <div class="card-badge">Summer</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-freezerof">
+        <span class="card-emoji">❄️</span>
+        <div class="card-name">Freezer Door Old Fashioned</div>
+        <div class="card-spirit">Bourbon · Batch</div>
+        <div class="card-desc">Woodford Reserve, Angostura & orange bitters, simple syrup, water — make ahead</div>
+        <div class="card-badge">Batch · Freezer Ready</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-peachsmash">
+        <span class="card-emoji">🍑</span>
+        <div class="card-name">Peach Bourbon Smash</div>
+        <div class="card-spirit">Bourbon</div>
+        <div class="card-desc">Woodford Reserve, fresh peach, muddled lemon, mint, simple syrup</div>
+        <div class="card-badge">Summer · Seasonal</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-mule">
+        <span class="card-emoji">🫚</span>
+        <div class="card-name">The Brandt's Mule</div>
+        <div class="card-spirit">Your Choice</div>
+        <div class="card-desc">Kentucky · Moscow · Mexican — Fever-Tree Ginger Beer, fresh lime, mint</div>
+        <div class="card-badge">Choose Your Spirit</div>
+      </a>
+
+      <a class="cocktail-card" href="#r-housemarg">
+        <span class="card-emoji">🌵</span>
+        <div class="card-name">Brandt's House Margarita</div>
+        <div class="card-spirit">Tequila</div>
+        <div class="card-desc">Steven's recipe — house tequila, fresh lime, simple syrup, Cointreau</div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<!-- ==================== RECIPE PAGES ==================== -->
+
+<!-- OLD FASHIONED -->
+<div id="r-oldfashioned" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🌶️</div>
+  <div class="recipe-name">The Old Fashioned</div>
+  <div class="recipe-spirit">Bourbon · Daily Signature</div>
+  <div class="recipe-tagline">Woodford Reserve with house-made coriander red pepper syrup & orange</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Woodford Reserve Bourbon</span></li>
+    <li class="ingredient"><span class="ing-amount">⅜ oz</span><span class="ing-name">Coriander Red Pepper Simple Syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">3 dashes</span><span class="ing-name">Angostura Bitters</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Large single ice cube</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Orange peel, for garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Place large ice cube in a rocks glass.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add syrup and bitters to mixing glass. Add Woodford. Fill with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div><div class="step-text">Stir slowly and deliberately for 30 seconds. Do NOT shake.</div><div class="step-note">Stirring keeps it crystal clear.</div></div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Strain over the large ice cube.</div></li>
+    <li class="step"><span class="step-num">5</span><div><div class="step-text">Hold orange peel skin-side down, twist firmly to express oils over the drink. Run around rim, drop in.</div><div class="step-note">The expressed oils are the magic.</div></div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Stirred, never shaken — shaking clouds the drink.</p>
+    <p>Large cube chills slowly and controls dilution perfectly.</p>
+    <p>Syrup recipe in the House Syrups tab.</p>
+  </div>
+</div>
+
+<!-- MANHATTAN -->
+<div id="r-manhattan" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🍒</div>
+  <div class="recipe-name">The Brandt Manhattan</div>
+  <div class="recipe-spirit">Rye Whiskey</div>
+  <div class="recipe-tagline">Bold and classic — the crown jewel of Brandt's Bar</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Bulleit Rye Whiskey</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">Sweet Vermouth</span></li>
+    <li class="ingredient"><span class="ing-amount">2 dashes</span><span class="ing-name">Angostura Bitters</span></li>
+    <li class="ingredient"><span class="ing-amount">3 dashes</span><span class="ing-name">Peychaud's Bitters</span></li>
+    <li class="ingredient"><span class="ing-amount">3</span><span class="ing-name">Luxardo Cherries, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Chill a coupe or martini glass in the freezer at least 10 minutes.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add ice to mixing glass. Pour in Bulleit Rye, sweet vermouth, Angostura, and Peychaud's bitters.</div></li>
+    <li class="step"><span class="step-num">3</span><div><div class="step-text">Stir slowly for 30 seconds. Do NOT shake.</div><div class="step-note">Stirring keeps it crystal clear.</div></div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Strain into chilled coupe glass.</div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Skewer 3 Luxardo cherries on a cocktail pick. Rest across the rim.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Use Carpano Antica or Cocchi di Torino for sweet vermouth — cheap vermouth will ruin it.</p>
+    <p>Luxardo cherries are non-negotiable. No maraschino cherries at Brandt's Bar.</p>
+    <p>Served up — no ice in the glass.</p>
+  </div>
+</div>
+
+<!-- ROSEMARY MARTINI -->
+<div id="r-rosemary" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🌿</div>
+  <div class="recipe-name">Rosemary Lemon Martini</div>
+  <div class="recipe-spirit">Vodka</div>
+  <div class="recipe-tagline">Elegant, aromatic, and highly requested at Brandt's Bar</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Tito's Vodka</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Fresh lemon juice</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Rosemary Simple Syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh rosemary sprig, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lemon twist, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Chill martini glass in freezer at least 10 minutes.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Fill shaker with ice. Add Tito's, lemon juice, and rosemary simple syrup.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Shake hard for 15 seconds until ice cold.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Double strain into chilled martini glass.</div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Garnish with rosemary sprig and lemon twist. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Always serve up in a chilled martini glass — this cocktail deserves the elegance.</p>
+    <p>The rosemary aroma hits before the first sip — that's the magic.</p>
+    <p>Rosemary syrup recipe in the House Syrups tab. Keeps 2 weeks refrigerated.</p>
+  </div>
+</div>
+
+<!-- BLOOD ORANGE MARG -->
+<div id="r-bloodmarg" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🍊</div>
+  <div class="recipe-name">Blood Orange Margarita</div>
+  <div class="recipe-spirit">Tequila</div>
+  <div class="recipe-tagline">Bold citrus and a Brandt's Bar signature twist</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">House Tequila Blanco</span></li>
+    <li class="ingredient"><span class="ing-amount">1¼ oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">Fresh blood orange juice</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Cointreau</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Dried blood orange wheel, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh basil sprig, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">—</span><span class="ing-name">Kosher salt for half rim</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Run lime wedge around half the rim. Dip into kosher salt. Fill with ice.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add tequila, lime, blood orange juice, and Cointreau to shaker with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Shake hard 15 seconds.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Strain over fresh ice in prepared glass.</div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Perch dried blood orange wheel on rim. Tuck in fresh basil sprig.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Always use fresh squeezed lime and blood orange — bottled juice flattens the flavor.</p>
+    <p>Blood oranges most available November through March — note seasonally.</p>
+    <p>Half salt rim lets guests choose their experience.</p>
+  </div>
+</div>
+
+<!-- BLOOD ORANGE MULE -->
+<div id="r-bloodmule" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🍊</div>
+  <div class="recipe-name">Blood Orange Mule</div>
+  <div class="recipe-spirit">Vodka · Tequila · Bourbon — Your Choice</div>
+  <div class="recipe-tagline">One cocktail, three personalities — pick your mood</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">🫙 Tito's Vodka — OR — 🌵 House Tequila — OR — 🥃 Woodford Bourbon</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">4 oz</span><span class="ing-name">Fever-Tree Blood Orange Ginger Beer</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Fresh blood orange juice (optional)</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Dried blood orange wheel, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh basil sprig, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Fill copper mug or rocks glass with ice.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add spirit of choice, lime juice, and blood orange juice if using.</div></li>
+    <li class="step"><span class="step-num">3</span><div><div class="step-text">Gently pour in Fever-Tree Blood Orange Ginger Beer. Light stir — don't lose the fizz.</div></div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Perch dried blood orange wheel on rim. Tuck in basil sprig. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>🫙 Vodka (Tito's) — Clean & classic</p>
+    <p>🌵 Tequila — Bold & earthy</p>
+    <p>🥃 Bourbon (Woodford) — Warm & rich, especially great in fall/winter</p>
+    <p>The basil garnish sets this apart from a standard mule.</p>
+  </div>
+</div>
+
+<!-- MAI TAI -->
+<div id="r-maitai" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🌴</div>
+  <div class="recipe-name">Mai Tai</div>
+  <div class="recipe-spirit">Rum · Summer</div>
+  <div class="recipe-tagline">A tropical classic with Appleton Estate Jamaican Rum</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Appleton Estate Jamaican Rum</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Cointreau</span></li>
+    <li class="ingredient"><span class="ing-amount">¼ oz</span><span class="ing-name">Orgeat Syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">¼ oz</span><span class="ing-name">Simple Syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh mint sprig, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lime wheel, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Fill rocks glass or tiki mug with crushed ice.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add rum, lime, Cointreau, orgeat, and simple syrup to shaker with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Shake hard 15 seconds.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Strain over fresh crushed ice.</div></li>
+    <li class="step"><span class="step-num">5</span><div><div class="step-text">Slap mint sprig between palms to release aroma. Tuck alongside lime wheel.</div></div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Appleton Estate is the backbone — don't substitute.</p>
+    <p>Orgeat is the secret weapon — that almond sweetness is what makes it a Mai Tai.</p>
+    <p>Optional: float a small splash of dark rum on top before garnishing for a showstopper.</p>
+  </div>
+</div>
+
+<!-- BLUEBERRY SMASH -->
+<div id="r-smash" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🫐</div>
+  <div class="recipe-name">Blueberry Bourbon Smash</div>
+  <div class="recipe-spirit">Bourbon</div>
+  <div class="recipe-tagline">Bold, fruity, and refreshing — a perfect summer bourbon cocktail</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Woodford Reserve Bourbon</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Fresh lemon juice</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Simple Syrup (adjust to taste)</span></li>
+    <li class="ingredient"><span class="ing-amount">5</span><span class="ing-name">Fresh mint leaves</span></li>
+    <li class="ingredient"><span class="ing-amount">1 handful</span><span class="ing-name">Fresh blueberries (+ extra for garnish)</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div><div class="step-text">Add blueberries and mint to shaker. Muddle gently until blueberries release juice — about 5 seconds.</div><div class="step-note">Don't over-muddle or it turns bitter.</div></div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add Woodford, lemon juice, and simple syrup. Fill with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Shake hard 15 seconds.</div></li>
+    <li class="step"><span class="step-num">4</span><div><div class="step-text">Double strain over fresh ice in large rocks glass.</div><div class="step-note">Double straining removes skins and mint bits for a cleaner look.</div></div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Garnish with blueberries on a cocktail pick and fresh mint sprig.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Simple syrup: ½ oz for drier, ¾ oz for sweeter — adjust to your crowd.</p>
+    <p>Woodford's vanilla and oak notes pair beautifully with blueberry.</p>
+  </div>
+</div>
+
+<!-- BOURBON BACON BEAUTIFUL -->
+<div id="r-bbb" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🥓</div>
+  <div class="recipe-name">Bourbon.Bacon.Beautiful</div>
+  <div class="recipe-spirit">Bourbon · Plan 3 Days Ahead</div>
+  <div class="recipe-tagline">Brandt's Bar's most ambitious cocktail — see Plan Ahead tab for prep timeline</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Bacon Fat Washed Woodford Reserve</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Fresh lemon juice</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Grapefruit Shrub</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">High quality maple syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Candied maple bacon strip, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Add fat washed Woodford, lemon juice, grapefruit shrub, and maple syrup to shaker with ice.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Shake hard 15 seconds.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Strain over fresh ice in highball or large rocks glass.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Rest candied maple bacon strip across the rim. Serve and watch the reaction. 🥓</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>⚠️ Requires 3 days prep — see the Plan Ahead tab for the full timeline.</p>
+    <p>Bacon fat wash rounds out Woodford's vanilla and caramel notes beautifully.</p>
+    <p>Grapefruit shrub recipe in the House Syrups tab. Keeps 3 months refrigerated.</p>
+    <p>Originally from The Pearl — adapted for Brandt's Bar.</p>
+  </div>
+</div>
+
+<!-- CHRISTMAS POM MARTINI -->
+<div id="r-pommartini" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🎄</div>
+  <div class="recipe-name">Christmas Pomegranate Martini</div>
+  <div class="recipe-spirit">Vodka · Christmas Tradition</div>
+  <div class="recipe-tagline">The Brandt's Bar Christmas tradition — stunning, festive, always requested</div>
+  <div class="section-label">Single Drink</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">2 oz</span><span class="ing-name">Tito's Vodka</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">PAMA Pomegranate Liqueur</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">Cointreau</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">Pomegranate juice</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lime wheel, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1 tsp</span><span class="ing-name">Pomegranate seeds, garnish</span></li>
+  </ul>
+  <div class="section-label">Christmas Batch — Serves 12</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 cups</span><span class="ing-name">Tito's Vodka</span></li>
+    <li class="ingredient"><span class="ing-amount">1½ cups</span><span class="ing-name">PAMA Pomegranate Liqueur</span></li>
+    <li class="ingredient"><span class="ing-amount">1½ cups</span><span class="ing-name">Cointreau</span></li>
+    <li class="ingredient"><span class="ing-amount">⅔ cup</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">1½ cups</span><span class="ing-name">Pomegranate juice</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div><div class="step-text">Batch: Combine all in pitcher. Refrigerate up to 24 hours. Shake individual portions with ice and strain to order.</div></div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Single: Shake all ingredients with ice 15 seconds. Strain into chilled martini glass.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Garnish with lime wheel on rim and float pomegranate seeds on top.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>PAMA is what makes this special — don't substitute.</p>
+    <p>Pomegranate seeds floating in the glass look stunning at Christmas.</p>
+    <p>Red sanding sugar rim makes it extra festive.</p>
+    <p>Batch flavors meld beautifully overnight — make ahead!</p>
+  </div>
+</div>
+
+<!-- RANCH WATER -->
+<div id="r-ranchwater" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">💧</div>
+  <div class="recipe-name">Ranch Water</div>
+  <div class="recipe-spirit">Tequila · Summer</div>
+  <div class="recipe-tagline">The ultimate Texas summer sipper — crisp, simple, refreshing</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">House Tequila Blanco</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">Top</span><span class="ing-name">Sparkling water (Topo Chico preferred)</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lime wedge, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Fill a highball glass or bottle with ice.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add tequila and fresh lime juice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Top with sparkling water. Light stir to combine.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Garnish with a lime wedge. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Topo Chico is the traditional Texas choice — the mineral water adds a unique character.</p>
+    <p>Keep it simple — this drink is all about the quality of the tequila and fresh lime.</p>
+    <p>Perfect for a hot summer day at the bar.</p>
+  </div>
+</div>
+
+<!-- WHISKEY LEMONADE -->
+<div id="r-whiskeylemonade" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🍋</div>
+  <div class="recipe-name">Whiskey Lemonade</div>
+  <div class="recipe-spirit">Bourbon · Summer Batch</div>
+  <div class="recipe-tagline">Fresh squeezed lemonade meets Woodford Reserve — a summer crowd pleaser</div>
+  <div class="section-label">Batch Ingredients — 750ml bottle yields ~12 drinks at 4oz each</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">750 ml</span><span class="ing-name">Woodford Reserve Bourbon (full bottle)</span></li>
+    <li class="ingredient"><span class="ing-amount">7 oz</span><span class="ing-name">Fresh squeezed lemon juice</span></li>
+    <li class="ingredient"><span class="ing-amount">4 oz</span><span class="ing-name">Simple syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">6–8 dashes</span><span class="ing-name">Orange bitters</span></li>
+    <li class="ingredient"><span class="ing-amount">Top</span><span class="ing-name">Lemon bubbly water (per drink)</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lemon wheel, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Combine Woodford, lemon juice, simple syrup, and orange bitters in a large pitcher. Stir well. Refrigerate until service.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">To serve: pour 4oz of batch over ice in a highball glass.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Top with lemon bubbly water. Light stir.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Garnish with lemon wheel. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Always use fresh squeezed lemon — bottled juice kills this drink.</p>
+    <p>Orange bitters are the secret ingredient — don't skip them.</p>
+    <p>Batch can be made up to 24 hours ahead. Add bubbly water per drink at service only.</p>
+    <p>4oz per drink is the Brandt's Bar standard pour from this batch.</p>
+  </div>
+</div>
+
+<!-- EASY PALOMA -->
+<div id="r-paloma" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🍊</div>
+  <div class="recipe-name">Easy Paloma</div>
+  <div class="recipe-spirit">Tequila · Summer</div>
+  <div class="recipe-tagline">Mexico's most popular cocktail — bright, citrusy, and effortless</div>
+  <div class="section-label">Ingredients — 1:3 ratio</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">House Tequila Blanco (1 part)</span></li>
+    <li class="ingredient"><span class="ing-amount">9 oz</span><span class="ing-name">Grapefruit soda — Jarritos or Squirt (3 parts)</span></li>
+    <li class="ingredient"><span class="ing-amount">Squeeze</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">Pinch</span><span class="ing-name">Salt</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Grapefruit wedge or lime wheel, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Fill a highball glass with ice.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add tequila, squeeze of fresh lime, and pinch of salt.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Top with grapefruit soda. Light stir to combine.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Garnish with grapefruit wedge or lime wheel.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Jarritos Grapefruit or Squirt are the classic choices.</p>
+    <p>The pinch of salt brightens all the flavors — don't skip it.</p>
+    <p>For a salted rim, run a lime wedge around the rim and dip in coarse salt before building.</p>
+    <p>Simple ratio: 1 part tequila, 3 parts grapefruit soda.</p>
+  </div>
+</div>
+
+<!-- CAIPIRINHA -->
+<div id="r-caipirinha" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🇧🇷</div>
+  <div class="recipe-name">The Caipirinha</div>
+  <div class="recipe-spirit">Cachaça · Summer</div>
+  <div class="recipe-tagline">Brazil's national cocktail — muddled lime, sugar, and cachaça over ice</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Cachaça (Brazilian sugarcane spirit)</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Whole lime, cut into chunks</span></li>
+    <li class="ingredient"><span class="ing-amount">2 tsp</span><span class="ing-name">White sugar</span></li>
+    <li class="ingredient"><span class="ing-amount">1 cup</span><span class="ing-name">Crushed ice</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div><div class="step-text">Cut lime into chunks and place directly in a rocks glass. Add sugar.</div></div></li>
+    <li class="step"><span class="step-num">2</span><div><div class="step-text">Muddle firmly to release the lime juice and dissolve the sugar into the juice.</div><div class="step-note">Muddle well — you want all the juice and oils out of the lime.</div></div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Fill the glass with crushed ice.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Pour cachaça over the ice. Stir well to combine. Serve as-is with the muddled lime in the glass.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Cachaça is made from fresh sugarcane juice — not rum. They're different spirits.</p>
+    <p>Leblon or Novo Fogo are excellent widely available cachaça brands.</p>
+    <p>The lime chunks stay in the glass — that's traditional and correct.</p>
+    <p>Built directly in the glass — no shaker needed.</p>
+  </div>
+</div>
+
+<!-- FREEZER DOOR OLD FASHIONED -->
+<div id="r-freezerof" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">❄️</div>
+  <div class="recipe-name">Freezer Door Old Fashioned</div>
+  <div class="recipe-spirit">Bourbon · Make-Ahead Batch</div>
+  <div class="recipe-tagline">A full bottle of Woodford transformed into instant Old Fashioneds — always ready in the freezer</div>
+  <div class="section-label">Batch Ingredients — yields ~17 drinks</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">750 ml</span><span class="ing-name">Woodford Reserve Bourbon (full bottle)</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Angostura Bitters</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Orange Bitters</span></li>
+    <li class="ingredient"><span class="ing-amount">4 oz</span><span class="ing-name">Simple Syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">6 oz</span><span class="ing-name">Water</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Large ice cube per serving</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Orange peel per serving, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Combine Woodford, both bitters, simple syrup, and water in a large pitcher or directly back into the empty bourbon bottle. Stir well.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Pour into a sealable container or back into the bourbon bottle. Place in freezer. The alcohol content keeps it from fully freezing.</div></li>
+    <li class="step"><span class="step-num">3</span><div><div class="step-text">To serve: pour approximately 3oz over a large single ice cube in a rocks glass.</div><div class="step-note">No stirring needed — it's already diluted and chilled perfectly.</div></div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Express orange peel over the glass, run around the rim, and drop in. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>The water is pre-dilution — it replicates the dilution from stirring so the drink is perfectly balanced straight from the freezer.</p>
+    <p>Keeps in the freezer indefinitely — perfect for spontaneous guests.</p>
+    <p>Both Angostura AND orange bitters gives this more complexity than a standard Old Fashioned.</p>
+    <p>Always express the orange peel — the oils make the drink.</p>
+  </div>
+</div>
+
+<!-- PEACH BOURBON SMASH -->
+<div id="r-peachsmash" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🍑</div>
+  <div class="recipe-name">Peach Bourbon Smash</div>
+  <div class="recipe-spirit">Bourbon · Summer Seasonal</div>
+  <div class="recipe-tagline">Fresh peaches meet Woodford Reserve — the taste of summer in a glass</div>
+  <div class="section-label">Ingredients — Muddle these together</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">Woodford Reserve Bourbon</span></li>
+    <li class="ingredient"><span class="ing-amount">4</span><span class="ing-name">Large fresh mint leaves</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Simple syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">¼</span><span class="ing-name">Lemon, cut into chunks</span></li>
+    <li class="ingredient"><span class="ing-amount">3</span><span class="ing-name">Fresh peach slices</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Large single ice cube</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh mint sprig, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh peach slice, garnish</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div><div class="step-text">Add mint leaves, simple syrup, lemon chunks, and peach slices to a shaker. Muddle firmly until peach and lemon release their juice and mint is fragrant.</div><div class="step-note">Muddling the lemon chunks gets the oils from the peel — more flavor than juice alone.</div></div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add Woodford Reserve and fill shaker with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Shake hard for 15 seconds.</div></li>
+    <li class="step"><span class="step-num">4</span><div><div class="step-text">Double strain over a large single ice cube in a rocks glass.</div><div class="step-note">Double straining keeps it clean and elegant — removes all peach skin and mint bits.</div></div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Garnish with fresh mint sprig and a fresh peach slice on the rim. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Only make this when peaches are in season — fresh ripe peaches make all the difference.</p>
+    <p>The large ice cube is key — keeps it cold without diluting the fresh fruit flavors.</p>
+    <p>Woodford's vanilla and caramel notes pair beautifully with fresh peach.</p>
+    <p>A seasonal Brandt's Bar specialty — enjoy it while it lasts! 🍑</p>
+  </div>
+</div>
+
+<!-- BRANDT'S MULE -->
+<div id="r-mule" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🫚</div>
+  <div class="recipe-name">The Brandt's Mule</div>
+  <div class="recipe-spirit">Bourbon · Vodka · Tequila — Your Choice</div>
+  <div class="recipe-tagline">Pick your spirit, pick your mood — three classic mules, one perfect recipe</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">🥃 Woodford Reserve — Kentucky Mule<br>🫙 Tito's Vodka — Moscow Mule<br>🌵 House Tequila — Mexican Mule</span></li>
+    <li class="ingredient"><span class="ing-amount">¾ oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">4 oz</span><span class="ing-name">Fever-Tree Premium Ginger Beer</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Fresh mint sprig, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lime wedge, garnish</span></li>
+    <li class="ingredient"><span class="ing-amount">1 cup</span><span class="ing-name">Ice (crushed preferred)</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div><div class="step-text">Choose your spirit:<br>🥃 Woodford Reserve = Kentucky Mule<br>🫙 Tito's Vodka = Moscow Mule<br>🌵 House Tequila = Mexican Mule</div></div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Fill a copper mug or rocks glass with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Add spirit of choice and fresh lime juice.</div></li>
+    <li class="step"><span class="step-num">4</span><div><div class="step-text">Gently pour in Fever-Tree Ginger Beer. Light stir to combine — don't lose the fizz.</div></div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Slap mint sprig between palms to release aroma. Tuck alongside lime wedge. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>🥃 Kentucky Mule — Woodford's vanilla and caramel warm up the ginger beautifully</p>
+    <p>🫙 Moscow Mule — The classic. Clean, crisp, and refreshing</p>
+    <p>🌵 Mexican Mule — Tequila's earthy agave plays perfectly with the spicy ginger</p>
+    <p>Copper mug is traditional and keeps the drink ice cold longer.</p>
+    <p>Always slap the mint — the aroma is half the experience.</p>
+  </div>
+</div>
+
+<!-- BRANDT'S HOUSE MARGARITA -->
+<div id="r-housemarg" class="recipe-page">
+  <a class="back-link" href="#cocktails">← All Cocktails</a>
+  <div class="recipe-emoji">🌵</div>
+  <div class="recipe-name">Brandt's House Margarita</div>
+  <div class="recipe-spirit">Tequila</div>
+  <div class="recipe-tagline">Steven's recipe — the foundation of the Brandt's Bar tequila program · 2:1:1 ratio</div>
+  <div class="section-label">Ingredients</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">3 oz</span><span class="ing-name">House Tequila Blanco</span></li>
+    <li class="ingredient"><span class="ing-amount">1½ oz</span><span class="ing-name">Fresh lime juice</span></li>
+    <li class="ingredient"><span class="ing-amount">1 oz</span><span class="ing-name">Simple syrup</span></li>
+    <li class="ingredient"><span class="ing-amount">½ oz</span><span class="ing-name">Cointreau</span></li>
+    <li class="ingredient"><span class="ing-amount">—</span><span class="ing-name">Kosher salt for rim (optional)</span></li>
+    <li class="ingredient"><span class="ing-amount">1</span><span class="ing-name">Lime wedge, garnish</span></li>
+  </ul>
+  <div class="section-label">The House Ratio</div>
+  <ul class="ingredients-list">
+    <li class="ingredient"><span class="ing-amount">2 parts</span><span class="ing-name">Tequila</span></li>
+    <li class="ingredient"><span class="ing-amount">1 part</span><span class="ing-name">Sweet (simple syrup + Cointreau)</span></li>
+    <li class="ingredient"><span class="ing-amount">1 part</span><span class="ing-name">Sour (lime juice)</span></li>
+  </ul>
+  <div class="section-label">Method</div>
+  <ol class="steps-list">
+    <li class="step"><span class="step-num">1</span><div class="step-text">Salt the rim if desired — run lime wedge around rim and dip in kosher salt.</div></li>
+    <li class="step"><span class="step-num">2</span><div class="step-text">Add tequila, lime juice, simple syrup, and Cointreau to shaker filled with ice.</div></li>
+    <li class="step"><span class="step-num">3</span><div class="step-text">Shake hard for 15 seconds.</div></li>
+    <li class="step"><span class="step-num">4</span><div class="step-text">Strain over fresh ice in a rocks glass or serve up.</div></li>
+    <li class="step"><span class="step-num">5</span><div class="step-text">Garnish with lime wedge. Serve immediately.</div></li>
+  </ol>
+  <div class="notes-box">
+    <p>Steven's recipe — the 2:1:1 ratio is the key. Scale up or down but never change the ratio.</p>
+    <p>Always fresh squeezed lime — never bottled.</p>
+    <p>For the Blood Orange version see the Blood Orange Margarita recipe.</p>
+    <p>House tequila TBD — tasting between Espolòn, Olmeca Altos, and Cimarron.</p>
+  </div>
+</div>
+
+<!-- ==================== SYRUPS ==================== -->
+<div id="syrups" class="tab-section">
+  <div class="main">
+
+    <div class="section-card">
+      <div class="section-card-title">🌶️ Coriander Red Pepper Syrup</div>
+      <div class="section-card-sub">Used in: The Old Fashioned (Daily)</div>
+      <div class="section-label">Ingredients</div>
+      <ul class="ingredients-list">
+        <li class="ingredient"><span class="ing-amount">1 cup</span><span class="ing-name">Water</span></li>
+        <li class="ingredient"><span class="ing-amount">1 cup</span><span class="ing-name">White sugar</span></li>
+        <li class="ingredient"><span class="ing-amount">2 tbsp</span><span class="ing-name">Whole coriander seeds</span></li>
+        <li class="ingredient"><span class="ing-amount">Generous</span><span class="ing-name">Red pepper flakes — to taste</span></li>
+      </ul>
+      <div class="section-label">Method</div>
+      <ol class="steps-list">
+        <li class="step"><span class="step-num">1</span><div class="step-text">Toast coriander seeds in dry pot over medium heat 2–3 min until fragrant.</div></li>
+        <li class="step"><span class="step-num">2</span><div class="step-text">Remove from heat. Crack seeds with muddler right in the pot.</div></li>
+        <li class="step"><span class="step-num">3</span><div class="step-text">Return to heat. Add water, sugar, and generous red pepper flakes. Stir until dissolved.</div></li>
+        <li class="step"><span class="step-num">4</span><div><div class="step-text">Steep on low. Taste with a dipped spoon every few minutes. When you feel the heat on your palate — it's ready.</div><div class="step-note">Usually 15–30 minutes depending on your red pepper.</div></div></li>
+        <li class="step"><span class="step-num">5</span><div class="step-text">Strain through fine mesh into sealed jar. Cool and refrigerate. Keeps 2 weeks.</div></li>
+      </ol>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">🌿 Rosemary Simple Syrup</div>
+      <div class="section-card-sub">Used in: Rosemary Lemon Martini</div>
+      <div class="section-label">Ingredients</div>
+      <ul class="ingredients-list">
+        <li class="ingredient"><span class="ing-amount">1 cup</span><span class="ing-name">Water</span></li>
+        <li class="ingredient"><span class="ing-amount">1 cup</span><span class="ing-name">White sugar</span></li>
+        <li class="ingredient"><span class="ing-amount">4 sprigs</span><span class="ing-name">Fresh rosemary (6-inch)</span></li>
+      </ul>
+      <div class="section-label">Method</div>
+      <ol class="steps-list">
+        <li class="step"><span class="step-num">1</span><div class="step-text">Combine water and sugar over medium heat. Stir until dissolved.</div></li>
+        <li class="step"><span class="step-num">2</span><div class="step-text">Add rosemary sprigs. Remove from heat.</div></li>
+        <li class="step"><span class="step-num">3</span><div><div class="step-text">Steep until fully cooled — about 30 minutes. Longer = stronger flavor.</div><div class="step-note">Taste as you go.</div></div></li>
+        <li class="step"><span class="step-num">4</span><div class="step-text">Strain into sealed jar or squeeze bottle. Refrigerate. Keeps 2 weeks.</div></li>
+      </ol>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">🍊 Grapefruit Shrub</div>
+      <div class="section-card-sub">Used in: Bourbon.Bacon.Beautiful · Start 3 days ahead · Keeps 3 months</div>
+      <div class="section-label">Ingredients</div>
+      <ul class="ingredients-list">
+        <li class="ingredient"><span class="ing-amount">1 L</span><span class="ing-name">Fresh grapefruit juice</span></li>
+        <li class="ingredient"><span class="ing-amount">1 L</span><span class="ing-name">White sugar</span></li>
+        <li class="ingredient"><span class="ing-amount">½ L</span><span class="ing-name">White wine vinegar</span></li>
+        <li class="ingredient"><span class="ing-amount">½ L</span><span class="ing-name">Apple cider vinegar</span></li>
+      </ul>
+      <div class="section-label">Method</div>
+      <ol class="steps-list">
+        <li class="step"><span class="step-num">1</span><div class="step-text">Day 3: Combine grapefruit juice and sugar. Simmer until dissolved. Do not boil. Cool completely. Refrigerate 24 hours.</div></li>
+        <li class="step"><span class="step-num">2</span><div class="step-text">Day 2: Add both vinegars. Stir well. Bring to gentle simmer, remove from heat immediately.</div></li>
+        <li class="step"><span class="step-num">3</span><div class="step-text">Cool completely. Label, date, refrigerate. Keeps 3 months.</div></li>
+      </ol>
+    </div>
+
+  </div>
+</div>
+
+<!-- ==================== PLAN AHEAD ==================== -->
+<div id="planahead" class="tab-section">
+  <div class="main">
+    <div class="section-intro">The Bourbon.Bacon.Beautiful requires 3 days of prep. Here's your complete timeline. 🥓🥃</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-day">Day 3 — Start Here</div>
+        <div class="timeline-title">Make the Grapefruit Shrub Base</div>
+        <div class="timeline-desc">Combine 1L grapefruit juice + 1L sugar in pot. Simmer until dissolved. Do NOT boil. Cool completely. Refrigerate 24 hours. Do not add vinegar yet.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">Day 2 — Morning</div>
+        <div class="timeline-title">Finish the Grapefruit Shrub</div>
+        <div class="timeline-desc">Add ½L white wine vinegar + ½L apple cider vinegar to chilled syrup. Bring to gentle simmer, remove from heat immediately. Cool, label, date, refrigerate.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">Day 2 — Afternoon</div>
+        <div class="timeline-title">Start Bacon Fat Wash</div>
+        <div class="timeline-desc">Bake 1lb bacon at 325°F for ~10 min. Stripe with maple syrup. Return to oven 2–3 min until caramelized. Reserve liquid bacon fat. Pour 4 cups fat into Woodford Reserve. Stir well. Rest at room temp 4 hours.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">Day 2 — Evening</div>
+        <div class="timeline-title">Freeze the Bourbon</div>
+        <div class="timeline-desc">Place fat-washed bourbon in freezer overnight until bacon fat solidifies completely on top.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">Day 1 — Morning</div>
+        <div class="timeline-title">Skim & Strain the Bourbon</div>
+        <div class="timeline-desc">Skim solidified bacon fat from top. Strain bourbon through fine mesh or cheesecloth into clean container. Refrigerate until service.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-day">Day of Service</div>
+        <div class="timeline-title">Make the Candied Bacon Garnish</div>
+        <div class="timeline-desc">Use reserved maple-glazed bacon from Day 2. Break or cut into 3–4" strips. Store in airtight container until service. You're ready — let's go! 🥓</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-card">
+      <div class="section-card-title">🎄 Christmas Pomegranate Martini Batch</div>
+      <div class="section-card-sub">Make up to 24 hours ahead · Serves 12</div>
+      <div class="section-label">Batch Ingredients</div>
+      <ul class="ingredients-list">
+        <li class="ingredient"><span class="ing-amount">3 cups</span><span class="ing-name">Tito's Vodka</span></li>
+        <li class="ingredient"><span class="ing-amount">1½ cups</span><span class="ing-name">PAMA Pomegranate Liqueur</span></li>
+        <li class="ingredient"><span class="ing-amount">1½ cups</span><span class="ing-name">Cointreau</span></li>
+        <li class="ingredient"><span class="ing-amount">⅔ cup</span><span class="ing-name">Fresh lime juice</span></li>
+        <li class="ingredient"><span class="ing-amount">1½ cups</span><span class="ing-name">Pomegranate juice</span></li>
+      </ul>
+      <div class="notes-box">
+        <p>Combine all in pitcher. Refrigerate up to 24 hours — flavors meld beautifully overnight.</p>
+        <p>Shake individual portions with ice and strain into chilled martini glass to order.</p>
+        <p>Garnish: lime wheel + floating pomegranate seeds. Red sanding sugar rim optional.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== INVENTORY ==================== -->
+<div id="inventory" class="tab-section">
+  <div class="main">
+    <div class="inv-grid">
+      <div class="inv-card">
+        <div class="inv-title">🥃 Bourbon</div>
+        <div class="inv-sub">Woodford Reserve</div>
+        <div class="inv-uses">Daily Old Fashioned · Blueberry Smash · Bourbon.Bacon.Beautiful · Blood Orange Mule</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🌾 Rye</div>
+        <div class="inv-sub">Bulleit Rye</div>
+        <div class="inv-uses">The Brandt Manhattan</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🫙 Vodka</div>
+        <div class="inv-sub">Tito's</div>
+        <div class="inv-uses">Rosemary Martini · Blood Orange Mule · Christmas Pom Martini</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🌵 Tequila</div>
+        <div class="inv-sub">House Blanco — TBD</div>
+        <div class="inv-uses">Blood Orange Marg · Blood Orange Mule<br><br>Contenders: Espolòn · Olmeca Altos · Cimarron</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🍹 Rum</div>
+        <div class="inv-sub">Appleton Estate Jamaican</div>
+        <div class="inv-uses">Mai Tai (Summer)</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🍊 Cointreau</div>
+        <div class="inv-sub">Triple Sec</div>
+        <div class="inv-uses">Blood Orange Marg · Blood Orange Mule · Mai Tai · Christmas Pom Martini</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🍇 PAMA</div>
+        <div class="inv-sub">Pomegranate Liqueur</div>
+        <div class="inv-uses">Christmas Pomegranate Martini</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🌰 Orgeat</div>
+        <div class="inv-sub">Almond Syrup</div>
+        <div class="inv-uses">Mai Tai</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">💧 Bitters</div>
+        <div class="inv-sub">Angostura · Peychaud's</div>
+        <div class="inv-uses">Angostura: Old Fashioned, Manhattan<br>Peychaud's: Manhattan only</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🫧 Fever-Tree</div>
+        <div class="inv-sub">Premium + Blood Orange Ginger Beer</div>
+        <div class="inv-uses">Classic Mule · Blood Orange Mule</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🍒 Luxardo</div>
+        <div class="inv-sub">Maraschino Cherries</div>
+        <div class="inv-uses">The Brandt Manhattan — non-negotiable</div>
+      </div>
+      <div class="inv-card">
+        <div class="inv-title">🥓 Pantry</div>
+        <div class="inv-sub">Plan Ahead Items</div>
+        <div class="inv-uses">Bacon fat washed Woodford · Grapefruit shrub · Candied maple bacon · Coriander red pepper syrup · Rosemary syrup</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
